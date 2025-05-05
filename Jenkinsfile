@@ -1,11 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3'   // Aquí usamos una imagen oficial de Python.
-         
-            args '-u root:root' // Usar el usuario root en Docker para evitar problemas de permisos
-        }
-    }
+  agent { docker { image 'python:3.7.2' } }
     options {
         skipStagesAfterUnstable()
     }
