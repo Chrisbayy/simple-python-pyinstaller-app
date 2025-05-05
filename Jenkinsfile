@@ -1,13 +1,17 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3'
+        }
+    }
     environment {
         PATH = "/root/.local/bin:$PATH"
     }
     stages {
         stage('Build') {
             steps {
-                sh 'python3 -m pip install --upgrade pip'
-                sh 'python3 -m pip install -r requirements.txt'
+                sh 'python -m pip install --upgrade pip'
+                sh 'pip install -r requirements.txt'
             }
         }
         stage('Test') {
@@ -17,7 +21,8 @@ pipeline {
         }
         stage('Deliver') {
             steps {
-                sh 'docker run --rm -v "$PWD":/app -w /app python:3-alpine sh -c "pip install pyinstaller && pyinstaller --onefile sources/calc.py"'
+                sh 'pip install pyinstaller'
+                sh 'pyinstaller --onefile sources/calc.py'
             }
         }
     }
