@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'python:3'   // Aquí usamos una imagen oficial de Python.
-            label 'python'     // Puedes ajustar el label si tienes varios nodos.
+         
             args '-u root:root' // Usar el usuario root en Docker para evitar problemas de permisos
         }
     }
