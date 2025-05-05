@@ -1,18 +1,13 @@
+
+
 pipeline {
-    agent {
-        docker {
-            image 'python:3'   // Aquí usamos una imagen oficial de Python.
-            label 'python'     // Puedes ajustar el label si tienes varios nodos.
-            args '-u root:root' // Usar el usuario root en Docker para evitar problemas de permisos
-        }
-    }
+    agent any
     options {
         skipStagesAfterUnstable()
     }
     stages {
         stage('Build') {
             steps {
-                // Asegúrate de tener el código en el contenedor para que sea accesible
                 sh 'python -m py_compile sources/add2vals.py sources/calc.py'
                 stash(name: 'compiled-results', includes: 'sources/*.py*')
             }
@@ -27,15 +22,17 @@ pipeline {
                 }
             }
         }
-        stage('Deliver') {
+        stage('Deliver') { 
             steps {
-                sh "pyinstaller --onefile sources/add2vals.py"
+                sh "pyinstaller --onefile sources/add2vals.py" 
             }
             post {
                 success {
-                    archiveArtifacts 'dist/add2vals'
+                    archiveArtifacts 'dist/add2vals' 
                 }
             }
         }
     }
 }
+
+
