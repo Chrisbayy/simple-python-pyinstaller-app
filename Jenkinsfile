@@ -1,44 +1,23 @@
 pipeline {
-    agent none
+    agent any
+    environment {
+        PATH = "/root/.local/bin:$PATH"
+    }
     stages {
         stage('Build') {
-            agent {
-                docker {
-                    image 'python:2-alpine'
-                }
-            }
             steps {
-                sh 'python -m py_compile sources/add2vals.py sources/calc.py'
+                sh 'python3 -m pip install --upgrade pip'
+                sh 'python3 -m pip install -r requirements.txt'
             }
         }
         stage('Test') {
-            agent {
-                docker {
-                    image 'qnib/pytest'
-                }
-            }
             steps {
-                sh 'py.test --verbose --junit-xml test-reports/results.xml sources/test_calc.py'
-            }
-            post {
-                always {
-                    junit 'test-reports/results.xml'
-                }
+                sh 'pytest tests/test_calc.py'
             }
         }
         stage('Deliver') {
-            agent {
-                docker {
-                    image 'cdrx/pyinstaller-linux:python2'
-                }
-            }
             steps {
-                sh 'pyinstaller --onefile sources/add2vals.py'
-            }
-            post {
-                success {
-                    archiveArtifacts 'dist/add2vals'
-                }
+                sh 'docker run --rm -v "$PWD":/app -w /app python:3-alpine sh -c "pip install pyinstaller && pyinstaller --onefile sources/calc.py"'
             }
         }
     }
