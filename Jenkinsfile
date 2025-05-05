@@ -11,7 +11,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'python -m pip install --upgrade pip'
-                sh 'pip install -r requirements.txt'
+                sh 'pip install -r sources/requirements.txt'
             }
         }
         stage('Test') {
