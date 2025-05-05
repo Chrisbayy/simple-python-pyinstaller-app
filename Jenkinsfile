@@ -1,35 +1,39 @@
 pipeline {
   agent { docker { image 'python:3.7.2' } }
-    options {
-        skipStagesAfterUnstable()
+  options {
+    skipStagesAfterUnstable()
+  }
+  stages {
+    stage('Build') {
+      steps {
+        sh 'python -m py_compile sources/add2vals.py sources/calc.py'
+        stash(name: 'compiled-results', includes: 'sources/*.py*')
+      }
     }
-    stages {
-        stage('Build') {
-            steps {
-                // Asegúrate de tener el código en el contenedor para que sea accesible
-                sh 'python -m py_compile sources/add2vals.py sources/calc.py'
-                stash(name: 'compiled-results', includes: 'sources/*.py*')
-            }
+    stage('Test') {
+      steps {
+        sh '''
+          pip install pytest
+          mkdir -p test-reports
+          pytest --junit-xml=test-reports/results.xml sources/test_calc.py
+        '''
+      }
+      post {
+        always {
+          junit 'test-reports/results.xml'
         }
-        stage('Test') {
-            steps {
-                sh 'py.test --junit-xml test-reports/results.xml sources/test_calc.py'
-            }
-            post {
-                always {
-                    junit 'test-reports/results.xml'
-                }
-            }
-        }
-        stage('Deliver') {
-            steps {
-                sh "pyinstaller --onefile sources/add2vals.py"
-            }
-            post {
-                success {
-                    archiveArtifacts 'dist/add2vals'
-                }
-            }
-        }
+      }
     }
+    stage('Deliver') {
+      steps {
+        sh 'pip install pyinstaller'
+        sh 'pyinstaller --onefile sources/add2vals.py'
+      }
+      post {
+        success {
+          archiveArtifacts 'dist/add2vals'
+        }
+      }
+    }
+  }
 }
